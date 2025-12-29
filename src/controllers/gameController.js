@@ -1,22 +1,17 @@
-const { neon } = require('@neondatabase/serverless');
-const sql = neon(process.env.DATABASE_URL);
+import pool from '../config/db.js'; // Bizning local ulanishimiz
 
-exports.saveGameResult = async (roomId, winnerId, boardHistory) => {
+export async function saveGameResult(roomId, winnerId, boardHistory) {
+    const query = `
+        INSERT INTO game_results (room_id, winner_id, final_state, played_at)
+        VALUES ($1, $2, $3, NOW())
+    `;
+    const values = [roomId, winnerId, JSON.stringify(boardHistory)];
+
     try {
-        // Toza SQL orqali natijani yozish
-        await sql`
-            INSERT INTO game_results (room_id, winner_id, final_state, played_at)
-            VALUES (${roomId}, ${winnerId}, ${JSON.stringify(boardHistory)}, NOW())
-        `;
-        console.log("Natija Neon DB ga saqlandi.");
+        // Neon-mas, bizning pool orqali so'rov yuboramiz
+        await pool.query(query, values);
+        console.log("✅ Natija local PostgreSQL-ga saqlandi.");
     } catch (error) {
-        console.error("Neon DB error:", error);
+        console.error("❌ Local DB error:", error.message);
     }
-};
-
-const isValid = engine.isValidMove(game, from, to);
-if (isValid) {
-    const nextBoard = engine.movePiece(game.board, from, to);
-    game.board = nextBoard;
-    // ... turnni o'zgartirish va socket orqali tarqatish
 }

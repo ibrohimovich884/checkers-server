@@ -1,15 +1,18 @@
-import authMiddleware from '../middlewares/authMiddleware.js';
+import authMiddleware from '../middleweres/authMidlweres.js';
 import gameHandler from './gameHandler.js';
 
-module.exports = (io) => {
+const socketMain = (io) => {
     io.use(authMiddleware);
 
     io.on('connection', (socket) => {
-        console.log('User connected:', socket.user.id);
+        console.log('Foydalanuvchi ulandi:', socket.user.id);
         gameHandler(io, socket);
         
         socket.on('disconnect', () => {
-            console.log('User disconnected');
+            console.log('Foydalanuvchi chiqdi');
         });
     });
 };
+
+// MANA SHU QATORNI QO'SHING YOKI TEKSHIRING:
+export default socketMain;

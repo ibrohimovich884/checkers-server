@@ -1,7 +1,7 @@
 import engine from '../services/checkersEngine.js';
-import gameController from '../controllers/gameController.js';
+// 1. BU YERNI O'ZGARTIRDIK: hamma funksiyalarni gameController obyektiga yig'ib olamiz
+import * as gameController from '../controllers/gameController.js';
 
-// Local Data - Server xotirasida o'yinlarni vaqtincha saqlash
 const activeGames = new Map(); 
 
 const gameHandler = (io, socket) => {
@@ -15,25 +15,26 @@ const gameHandler = (io, socket) => {
                 players: [socket.user.id]
             });
         }
-        socket.emit('gameState', activeGames.get(roomId));
+        // Faqat kirgan odamga emas, xonadagilarga holatni yuborish yaxshi amaliyot
+        io.to(roomId).emit('gameState', activeGames.get(roomId));
     });
 
     socket.on('makeMove', async (data) => {
         const { roomId, from, to } = data;
         let game = activeGames.get(roomId);
 
+        // socket.user.id orqali turn-ni tekshirishni ham qo'shish kerak aslida
         if (game && engine.isValidMove(game, from, to)) {
-            // Local holatni yangilash
             game.board = engine.movePiece(game.board, from, to);
             game.turn = game.turn === 'white' ? 'black' : 'white';
 
             io.to(roomId).emit('updateBoard', game);
 
-            // O'yin tugashini tekshirish
             if (engine.isGameOver(game.board)) {
+                // gameController endi xato bermaydi
                 await gameController.saveGameResult(roomId, socket.user.id, game.board);
                 io.to(roomId).emit('gameOver', { winner: socket.user.username });
-                activeGames.delete(roomId); // Xotirani tozalash
+                activeGames.delete(roomId);
             }
         }
     });
