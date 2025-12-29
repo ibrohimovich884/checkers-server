@@ -1,0 +1,22 @@
+{
+  "name": "checkers-server",
+  "version": "1.0.0",
+  "description": "Sheckers game server",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibrohimovich884/checkers-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibrohimovich884/checkers-server/issues"
+  },
+  "homepage": "https://github.com/ibrohimovich884/checkers-server#readme"
+}

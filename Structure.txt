@@ -1,0 +1,13 @@
+server/
+├── src/
+│   ├── controllers/
+│   │   ├── authController.js      <-- (Faqat tokenni tasdiqlash uchun)
+│   │   └── gameController.js      <-- (O'yin natijalarini DB ga yozish uchun)
+│   ├── socket/
+│   │   ├── gameHandler.js         <-- (Move, Join kabi socket voqealari)
+│   │   └── socketMain.js          <-- (IO ulanishi va xonalarni boshqarish)
+│   ├── middlewares/
+│   │   └── authMiddleware.js      <-- (Socket ulanishidan oldin tokenni tekshirish)
+│   ├── services/
+│   │   └── checkersEngine.js      
+│   └── server.js
