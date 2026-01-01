@@ -7,8 +7,13 @@ import pool from './src/config/db.js';
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, { 
-    cors: { origin: "http://localhost:3000" } // Frontend porti
+// index.js ichida
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173", // SENING FRONTENDING PORTI
+        methods: ["GET", "POST"],
+        credentials: true
+    }
 });
 
 socketMain(io);

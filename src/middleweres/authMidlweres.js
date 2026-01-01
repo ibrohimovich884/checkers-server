@@ -1,20 +1,35 @@
 import jwt from 'jsonwebtoken';
 
 const authMiddleware = (socket, next) => {
-    // Client-dan ulanishda yuborilgan tokenni olish
     const token = socket.handshake.auth?.token;
+    
+    console.log("📡 Backend: Ulanish so'rovi keldi.");
+    console.log("🔍 Backend: Kelgan token:", token ? "Bor (tekshirilmoqda...)" : "Yo'q (XATO!)");
 
     if (!token) {
+        console.log("❌ Backend: Token topilmadi!");
         return next(new Error("Avtorizatsiya xatosi: Token topilmadi"));
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = decoded; // Foydalanuvchi ma'lumotlarini socketga biriktirish
+        console.log("✅ Backend: Token tasdiqlandi! User ID:", decoded.id);
+        socket.user = decoded;
         next();
     } catch (err) {
+        console.log("❌ Backend: JWT tasdiqlashda xato:", err.message);
         next(new Error("Avtorizatsiya xatosi: Yaroqsiz token"));
     }
 };
 
 export default authMiddleware;
+
+// const authMiddleware = (socket, next) => {
+//     // Vaqtincha har qanday ulanishga ruxsat beramiz
+//     // Keyinchalik foydalanuvchi ma'lumotlarini bazadan olish uchun decoded qismini qaytarasan
+//     socket.user = { id: 1, username: "Player_" + Math.floor(Math.random() * 100) };
+//     console.log("🔓 Auth vaqtincha ochiq. Foydalanuvchi ulandi.");
+//     next();
+// };
+
+// export default authMiddleware;
