@@ -1,43 +1,40 @@
 import jwt from 'jsonwebtoken';
-import pool from '../config/db.js'; // Bazaga ulanishni import qiling
+import dotenv from 'dotenv';
 
-const authMiddleware = async (socket, next) => {
+// Faylning o'zida ham dotenv yuklanishini ta'minlaymiz
+dotenv.config();
+
+const authMiddleware = (socket, next) => {
     const token = socket.handshake.auth?.token;
 
-    console.log("📡 Backend: Ulanish so'rovi.");
+    console.log("--- 🛡️ AUTH DEBUG START ---");
+    console.log("📍 Node Muhiti (NODE_ENV):", process.env.NODE_ENV);
+    console.log("📍 JWT_SECRET borligi:", process.env.JWT_SECRET ? "✅ MAVJUD" : "❌ YO'Q (UNDEFINED!)");
+    
+    // Agar localda bo'lsangiz, secret qiymatini ham tekshirib oling (ixtiyoriy)
+    // console.log("📍 JWT_SECRET qiymati:", process.env.JWT_SECRET); 
 
     if (!token) {
+        console.log("❌ XATO: Token kelmadi!");
         return next(new Error("Avtorizatsiya xatosi: Token topilmadi"));
     }
 
     try {
-        // 1. Tokenni tekshirish
+        // Agar secret yo'q bo'lsa, verify() funksiyasi "secret must be provided" xatosini otadi
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-        // 2. Bazadan foydalanuvchi ma'lumotlarini olish
-        // Love Island bazasida foydalanuvchilar 'users' jadvalida bo'ladi
-        const userRes = await pool.query(
-            'SELECT id, username, avatar_url FROM users WHERE id = $1', 
-            [decoded.id]
-        );
-
-        if (userRes.rows.length === 0) {
-            console.log("❌ Backend: Foydalanuvchi bazadan topilmadi!");
-            return next(new Error("Foydalanuvchi topilmadi"));
-        }
-
-        // 3. Socketga bazadan kelgan to'liq ma'lumotni biriktirish
         socket.user = {
-            id: userRes.rows[0].id,
-            username: userRes.rows[0].username,
-            avatar_url: userRes.rows[0].avatar_url || '/avatar.png'
+            id: decoded.id,
+            username: decoded.username || "Player",
         };
 
-        console.log(`✅ Backend: ${socket.user.username} muvaffaqiyatli ulandi.`);
+        console.log(`✅ MUVAFFAQIYAT: Foydalanuvchi ${socket.user.username} ulandi.`);
+        console.log("--- 🛡️ AUTH DEBUG END ---");
         next();
     } catch (err) {
-        console.log("❌ Backend: JWT xatosi:", err.message);
-        next(new Error("Avtorizatsiya xatosi: Yaroqsiz token"));
+        console.log("❌ XATO (JWT Verify):", err.message);
+        console.log("--- 🛡️ AUTH DEBUG END ---");
+        next(new Error("Avtorizatsiya xatosi: " + err.message));
     }
 };
 
