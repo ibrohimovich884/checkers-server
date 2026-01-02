@@ -1,4 +1,4 @@
-import authMiddleware from '../middleweres/authMidlweres.js';
+import authMiddleware from '../middlewares/authMidlweres.js'; // Yo'lni to'g'ri yoz
 import gameHandler from './gameHandler.js';
 
 const socketMain = (io) => {
